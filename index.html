@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ styles · monolithic dev console</title>
+    <title>⚡ styles · monolithic dev console · enhanced</title>
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Ace editor core + modes + theme -->
@@ -16,8 +15,74 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/theme-chrome.js"></script>
     <!-- JSZip for split feature -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- External CSS -->
+    <!-- External CSS (to be updated later) -->
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Temporary quick fixes for demonstration – will be moved to styles.css */
+        .main-dashboard {
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+        .left-explorer {
+            padding: 1.5rem;
+        }
+        .image-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .image-item {
+            padding: 1rem 0.5rem;
+            font-size: 0.9rem;
+        }
+        .image-item span {
+            font-size: 2.8rem;
+        }
+        .file-tree li {
+            padding: 0.6rem 1rem;
+            font-size: 0.95rem;
+        }
+        iframe {
+            height: 300px;
+        }
+        .right-preview {
+            gap: 1.5rem;
+        }
+        .editor-tab {
+            margin-bottom: 0.5rem;
+        }
+        .fullscreen-btn {
+            background: #2c4058;
+            border: 1px solid #4d6b8f;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .fullscreen-btn:hover {
+            background: #3f5c82;
+        }
+        .preview-header {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .preview-header span {
+            flex: 1;
+        }
+        .second-page-indicator {
+            background: #1e2b3b;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            text-align: center;
+            color: #b5d1f0;
+            border: 1px dashed #4d8fd8;
+            margin-top: 1rem;
+        }
+    </style>
 </head>
 <body>
     <!-- ========== TOP MEGA BAR ========== -->
@@ -43,7 +108,7 @@
 
     <!-- ========== MAIN DASHBOARD ========== -->
     <div class="main-dashboard">
-        <!-- LEFT PANEL: IMAGE DIRECTORY + FILE TREE -->
+        <!-- LEFT PANEL: IMAGE DIRECTORY + FILE TREE (enhanced spacing) -->
         <section class="left-explorer">
             <h2 class="section-title">📁 Image directory & file tree</h2>
             <div class="image-directory">
@@ -55,6 +120,10 @@
                     <div class="image-item"><span>📁</span><div>assets/</div></div>
                     <div class="image-item"><span>🖼️</span><div>logo.png</div></div>
                     <div class="image-item"><span>🔧</span><div>config.json</div></div>
+                    <!-- Added more items for demonstration -->
+                    <div class="image-item"><span>📦</span><div>dist/</div></div>
+                    <div class="image-item"><span>🧪</span><div>test.js</div></div>
+                    <div class="image-item"><span>📝</span><div>README.md</div></div>
                 </div>
             </div>
             <div class="file-tree">
@@ -65,7 +134,13 @@
                     <li>📄 script.js</li>
                     <li>📁 images/</li>
                     <li>📄 README.md</li>
+                    <li>📁 components/</li>
+                    <li>📄 package.json</li>
                 </ul>
+            </div>
+            <!-- Additional quick actions (second-page hint) -->
+            <div class="second-page-indicator">
+                <i class="fas fa-arrow-right"></i> More tools available in extended panel (coming soon)
             </div>
             <div class="go-to-buttons">
                 <button type="button" class="go-top">⬆ Go to top</button>
@@ -73,9 +148,14 @@
             </div>
         </section>
 
-        <!-- MIDDLE PANEL: ACE EDITORS -->
+        <!-- MIDDLE PANEL: ACE EDITORS (with expand button) -->
         <section class="middle-editors">
-            <h2 class="section-title">✏️ Code editors</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h2 class="section-title" style="margin-bottom: 0;">✏️ Code editors</h2>
+                <button type="button" id="expandEditorsBtn" class="fullscreen-btn" title="Expand editors to full screen (mock)">
+                    <i class="fas fa-expand"></i> Expand
+                </button>
+            </div>
 
             <!-- HTML editor -->
             <div class="editor-tab" id="html-editor-container">
@@ -130,13 +210,16 @@
             </div>
         </section>
 
-        <!-- RIGHT PANEL: PREVIEW & TOOLS (collapsible) -->
+        <!-- RIGHT PANEL: PREVIEW & TOOLS (with fullscreen button) -->
         <section class="right-preview" id="previewPanel">
             <div class="preview-header">
                 <span>🔍 preview (sandboxed)</span>
+                <button type="button" id="fullscreenPreviewBtn" class="fullscreen-btn" title="Fullscreen preview (mock)">
+                    <i class="fas fa-expand"></i> Fullscreen
+                </button>
                 <button type="button" id="refreshPreview">⟳ Refresh</button>
             </div>
-            <iframe src="about:blank"></iframe>
+            <iframe src="about:blank" title="Preview"></iframe>
 
             <div class="shuffle-area">
                 <span>🔀 Shuffle uploaded files:</span>
@@ -156,6 +239,11 @@
                 <button type="button" id="downloadCurrent">⬇ Download current file</button>
                 <button type="button" id="splitFile">✂ Split file into chunks</button>
                 <button type="button" id="downloadAll">📦 Download all as zip</button>
+            </div>
+
+            <!-- Second page hint: additional preview tools could appear here -->
+            <div class="second-page-indicator">
+                <i class="fas fa-layer-group"></i> Secondary preview controls (planned)
             </div>
 
             <div class="go-to-buttons">
@@ -219,10 +307,29 @@
             <button type="button" id="searchFilesBtn">🔍 search in files</button>
             <button type="button" id="footerTop">⬆ top</button>
             <button type="button" id="footerBottom">⬇ bottom</button>
+            <!-- New fullscreen footer action (mock) -->
+            <button type="button" id="fullscreenFooterBtn" class="fullscreen-btn" title="Fullscreen mode (mock)">
+                <i class="fas fa-expand"></i>
+            </button>
         </div>
     </footer>
 
-    <!-- External JavaScript -->
+    <!-- External JavaScript (to be updated later) -->
     <script src="scripts.js"></script>
+    <!-- Temporary inline script for fullscreen mock (to be moved) -->
+    <script>
+        (function() {
+            // Mock fullscreen buttons – actual implementation will be in scripts.js
+            document.getElementById('fullscreenPreviewBtn')?.addEventListener('click', () => {
+                alert('Fullscreen preview – to be implemented in JS');
+            });
+            document.getElementById('expandEditorsBtn')?.addEventListener('click', () => {
+                alert('Expand editors – to be implemented in JS');
+            });
+            document.getElementById('fullscreenFooterBtn')?.addEventListener('click', () => {
+                alert('Fullscreen mode – to be implemented in JS');
+            });
+        })();
+    </script>
 </body>
-  </html>
+    </html>
