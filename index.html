@@ -1,1 +1,228 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ styles · monolithic dev console</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Ace editor core + modes + theme -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/mode-html.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/mode-css.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/mode-javascript.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/theme-dracula.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/theme-chrome.js"></script>
+    <!-- JSZip for split feature -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ========== TOP MEGA BAR ========== -->
+    <header class="top-mega-bar">
+        <div class="logo-section">
+            <span>⚡ styles</span>
+            <span>monolithic dev console</span>
+        </div>
+        <div class="file-upload-global">
+            <label for="globalFileInput">📂 Upload Files (HTML/CSS/JS)</label>
+            <input type="file" id="globalFileInput" multiple accept=".html,.htm,.css,.js" style="display: none;">
+            <button type="button" class="shuffle-preview-btn">🔀 Shuffle Previews</button>
+        </div>
+        <div class="global-actions">
+            <button type="button" id="globalUndo">↩ Undo</button>
+            <button type="button" id="globalRedo">↪ Redo</button>
+            <button type="button" id="globalDownload">⬇ Download</button>
+            <button type="button" id="globalSplit">✂ Split into chunks</button>
+            <button type="button" id="toggleSettingsBtn">⚙ Settings</button>
+            <button type="button" id="togglePreviewBtn">👁 Toggle Preview</button>
+        </div>
+    </header>
+
+    <!-- ========== MAIN DASHBOARD ========== -->
+    <div class="main-dashboard">
+        <!-- LEFT PANEL: IMAGE DIRECTORY + FILE TREE -->
+        <section class="left-explorer">
+            <h2 class="section-title">📁 Image directory & file tree</h2>
+            <div class="image-directory">
+                <h3>🖼️ Icons / pointers</h3>
+                <div class="image-grid">
+                    <div class="image-item"><span>📄</span><div>index.html</div></div>
+                    <div class="image-item"><span>🎨</span><div>style.css</div></div>
+                    <div class="image-item"><span>⚡</span><div>script.js</div></div>
+                    <div class="image-item"><span>📁</span><div>assets/</div></div>
+                    <div class="image-item"><span>🖼️</span><div>logo.png</div></div>
+                    <div class="image-item"><span>🔧</span><div>config.json</div></div>
+                </div>
+            </div>
+            <div class="file-tree">
+                <h3>🌲 Project files</h3>
+                <ul id="fileTreeList">
+                    <li>📄 index.html (active)</li>
+                    <li>📄 style.css</li>
+                    <li>📄 script.js</li>
+                    <li>📁 images/</li>
+                    <li>📄 README.md</li>
+                </ul>
+            </div>
+            <div class="go-to-buttons">
+                <button type="button" class="go-top">⬆ Go to top</button>
+                <button type="button" class="go-bottom">⬇ Go to bottom</button>
+            </div>
+        </section>
+
+        <!-- MIDDLE PANEL: ACE EDITORS -->
+        <section class="middle-editors">
+            <h2 class="section-title">✏️ Code editors</h2>
+
+            <!-- HTML editor -->
+            <div class="editor-tab" id="html-editor-container">
+                <div class="editor-header">
+                    <div class="editor-header-left"><i class="fas fa-file-code"></i> index.html</div>
+                    <div class="editor-header-right">
+                        <button type="button" class="copy-btn">📋 Copy</button>
+                        <label>Go to line: <input type="number" min="1" value="1" class="goto-line"></label>
+                        <label>Search: <input type="text" placeholder="text..." class="search-input"></label>
+                        <button type="button" class="undo-btn">↩ Undo</button>
+                        <button type="button" class="redo-btn">↪ Redo</button>
+                    </div>
+                </div>
+                <textarea placeholder="<!-- HTML content -->">&lt;div class=&quot;container&quot;&gt;
+  &lt;h1&gt;Hello, world!&lt;/h1&gt;
+&lt;/div&gt;</textarea>
+            </div>
+
+            <!-- CSS editor -->
+            <div class="editor-tab" id="css-editor-container">
+                <div class="editor-header">
+                    <div class="editor-header-left"><i class="fas fa-paint-brush"></i> style.css</div>
+                    <div class="editor-header-right">
+                        <button type="button" class="copy-btn">📋 Copy</button>
+                        <label>Line: <input type="number" min="1" value="1" class="goto-line"></label>
+                        <label>Find: <input type="text" placeholder="..." class="search-input"></label>
+                        <button type="button" class="undo-btn">↩ Undo</button>
+                        <button type="button" class="redo-btn">↪ Redo</button>
+                    </div>
+                </div>
+                <textarea placeholder="/* CSS rules */">.container { max-width: 1200px; margin: 0 auto; }</textarea>
+            </div>
+
+            <!-- JavaScript editor -->
+            <div class="editor-tab" id="js-editor-container">
+                <div class="editor-header">
+                    <div class="editor-header-left"><i class="fas fa-code"></i> script.js</div>
+                    <div class="editor-header-right">
+                        <button type="button" class="copy-btn">📋 Copy</button>
+                        <label>Go to line: <input type="number" min="1" value="1" class="goto-line"></label>
+                        <label>Search: <input type="text" placeholder="..." class="search-input"></label>
+                        <button type="button" class="undo-btn">↩ Undo</button>
+                        <button type="button" class="redo-btn">↪ Redo</button>
+                    </div>
+                </div>
+                <textarea placeholder="// JavaScript">console.log('ready');</textarea>
+            </div>
+
+            <div class="go-to-buttons">
+                <button type="button" class="editor-top">⬆ Editor top</button>
+                <button type="button" class="editor-bottom">⬇ Editor bottom</button>
+            </div>
+        </section>
+
+        <!-- RIGHT PANEL: PREVIEW & TOOLS (collapsible) -->
+        <section class="right-preview" id="previewPanel">
+            <div class="preview-header">
+                <span>🔍 preview (sandboxed)</span>
+                <button type="button" id="refreshPreview">⟳ Refresh</button>
+            </div>
+            <iframe src="about:blank"></iframe>
+
+            <div class="shuffle-area">
+                <span>🔀 Shuffle uploaded files:</span>
+                <button type="button" id="shuffleHtml">Load next HTML</button>
+                <button type="button" id="shuffleCss">Load next CSS</button>
+                <button type="button" id="shuffleJs">Load next JS</button>
+                <span class="note">(combine previews)</span>
+            </div>
+
+            <div class="search-area">
+                <span>🔎 Search selected snippet:</span>
+                <input type="text" id="googleQuery" placeholder="ask Google...">
+                <button type="button" id="googleSearch">Google it</button>
+            </div>
+
+            <div class="download-area">
+                <button type="button" id="downloadCurrent">⬇ Download current file</button>
+                <button type="button" id="splitFile">✂ Split file into chunks</button>
+                <button type="button" id="downloadAll">📦 Download all as zip</button>
+            </div>
+
+            <div class="go-to-buttons">
+                <button type="button" class="preview-top">⬆ Preview top</button>
+                <button type="button" class="preview-bottom">⬇ Preview bottom</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- ========== SETTINGS PANEL (collapsible) ========== -->
+    <section class="settings-area" id="settingsPanel">
+        <div class="settings-header">
+            <h2>⚙️ Settings & preferences</h2>
+            <button type="button" id="closeSettingsBtn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="settings-grid">
+            <div>
+                <h3>Editor</h3>
+                <label><input type="checkbox" id="hyperscrollCheck"> Enable hyperscroll</label><br>
+                <label><input type="checkbox" id="wordWrapCheck"> Word wrap</label><br>
+                <label>Theme:
+                    <select id="themeSelect">
+                        <option>Dracula</option>
+                        <option>Chrome</option>
+                        <option>Monokai</option>
+                    </select>
+                </label>
+            </div>
+            <div>
+                <h3>Preview</h3>
+                <label><input type="checkbox" id="autoRefreshCheck"> Auto-refresh</label><br>
+                <label><input type="checkbox" id="sandboxCheck" checked disabled> Sandbox iframe</label><br>
+                <label>Zoom:
+                    <input type="range" id="zoomRange" min="50" max="200" value="100">
+                </label>
+            </div>
+            <div>
+                <h3>File handling</h3>
+                <label><input type="checkbox" id="autoMergeCheck"> Auto-merge duplicates</label><br>
+                <label><input type="checkbox" id="shuffleOnUploadCheck"> Shuffle on upload</label><br>
+                <label>Max chunk size:
+                    <input type="number" id="chunkSize" value="1024"> KB
+                </label>
+            </div>
+        </div>
+        <div class="settings-actions">
+            <button type="button" id="saveSettings">Save settings</button>
+            <button type="button" id="resetSettings">Reset</button>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer>
+        <div class="footer-stats">
+            <span id="fileCount"><i class="far fa-file"></i> 0 files loaded</span>
+            <span id="hyperStat"><i class="fas fa-tachometer-alt"></i> hyper mode: off</span>
+            <span><i class="fas fa-eye"></i> live preview ready</span>
+        </div>
+        <div class="footer-actions">
+            <button type="button" id="copyAllBtn">📋 copy all</button>
+            <button type="button" id="searchFilesBtn">🔍 search in files</button>
+            <button type="button" id="footerTop">⬆ top</button>
+            <button type="button" id="footerBottom">⬇ bottom</button>
+        </div>
+    </footer>
+
+    <!-- External JavaScript -->
+    <script src="scripts.js"></script>
+</body>
+  </html>
